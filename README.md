@@ -1,20 +1,21 @@
 
 golang mysql pool proxy(MPP)
 =======
-golang开发的一个mysql连接代理池, HTTP返回查询结果。
+mysql procy pool by golang, select query and use HTTP return data
 
+<a href="README_cn.md">中文说明</a>
 
-特性(迭代更新支持)
+Future(coming soon...)
 ======
-* golang查询mysql， 支持连接池， HTTP返回数据，通过POST传递sql语句 
-* 支持多种语言（发送POST请求即可） 
-* 读写分离 
-* SQL防注入 
-* 支持HTTPS 
-* 考虑支持分布式HTTP server
-* 假如log文件支持 
+* golang connect mysql， connect pool， HTTP get data，use POST for sql query 
+* support many program language (just use POST query) 
+* write, read separate 
+* deal SQL inject
+* support HTTPS 
+* distributed HTTP server
+* support log file
  
-编译启动方式(linux), windows照样
+build & run (linux), windows the same
 =====
 ```cd project_path  ```<br />
 ``` go build  ```<br />
@@ -23,15 +24,15 @@ golang开发的一个mysql连接代理池, HTTP返回查询结果。
 
 
 
-测试
+Test
 =======
-WIN7, go version go1.4.2 windows/386, PHP 5.6, MYSQL5.6, 1万条mysql数据
-example目录<br /><br />
-没使用MPP的文件，  php no_use_mpp.php  -----Use time: 1.2660720348358-------<br />
-使用MPP的文件，  php use_mpp.php   -----Use time: 0.37302088737488-------
+WIN7, go version go1.4.2 windows/386, PHP 5.6, MYSQL5.6, 10000 mysql rows
+example folder<br /><br />
+dont use MPP php file，  php no_use_mpp.php  -----Use time: 1.2660720348358-------<br />
+use MPP php file，  php use_mpp.php   -----Use time: 0.37302088737488-------
 
 
-[更多请联系<82049406@qq.com>]
+[more contact<82049406@qq.com>]
 
 
 
