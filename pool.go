@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"encoding/json"
 	// "os"
 )
 
@@ -54,6 +55,19 @@ func putPool(conn *sql.DB) {
 
 func mpp(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
+		/**
+		*	the json return back
+		* code 0 is for success
+		*			 1 is for wrong query
+		*			 2 is for wrong get data 
+		* status success or fail
+		* rows query data 
+		**/
+		var back = make(map[string]interface{})		//return json
+		back["code"] = 0;
+		back["status"] = "success";
+		back["rows"] = "";
+		
 		query := r.FormValue("query")
 		fmt.Println("query is: ", query)
 		// os.Exit(3)
@@ -62,6 +76,8 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 		rows, err := dbx.Query(query)
 		if err != nil {
 			log.Fatal(err)
+			back["code"] = 1;
+			back["status"] = "fail";
 		}
 
 		// var email string
@@ -79,6 +95,8 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 		for rows.Next() {
 			if err := rows.Scan(readCols...); err != nil {
 				log.Fatal(err)
+				back["code"] = 2;
+				back["status"] = "fail";
 			}
       
       for i, raw := range writeCols {
@@ -95,7 +113,11 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 		result = append(result[1:])
 		// fmt.Println(result)
 		resStr := strings.Join(result, ", ") 
-		fmt.Fprintf(w, resStr)
+		// fmt.Fprintf(w, resStr)
+		
+		back["rows"] = resStr 	
+		jsback, _ := json.Marshal(back)
+		fmt.Fprintf(w, string(jsback))
     
 		if err := rows.Err(); err != nil {
 			log.Fatal(err)
