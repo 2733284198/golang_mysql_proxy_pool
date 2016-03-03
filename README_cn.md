@@ -25,11 +25,13 @@ golang开发的一个mysql连接代理池, HTTP返回查询结果。
 {"code":0,"rows":"123@123.com","status":"success"} 的 json 格式<br />
 <br />
 属性说明<br />
-    * code 0 is for success<br />
-    *	--1 is for wrong query<br />
-    *	--2 is for wrong get data <br />
-    * status success or fail<br />
-    * rows query data <br />
+```
+code 0 is for success<br />
+    1 is for wrong query<br />
+    2 is for wrong get data <br />
+status success or fail<br />
+rows query data <br />
+```
 
 
 测试
