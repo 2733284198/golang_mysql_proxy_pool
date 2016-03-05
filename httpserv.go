@@ -9,16 +9,18 @@ package main
 import (
   // "database/sql"
   "fmt"
-  // _ "github.com/ziutek/mymysql/godrv"
-  // _ "github.com/go-sql-driver/mysql"
+  // "flag"
   "log"
   "net/http"
 )
 
-
 func startHttpServ() {
   http.HandleFunc("/mpp", mpp)
-  err := http.ListenAndServe(":9090", nil) 
+  config := readConfig()
+  // var port = ":9090"
+  var port = config["port"]
+  // fmt.Println(port)
+  err := http.ListenAndServe(":"+port, nil) 
   if err != nil {
     log.Fatal("ListenAndServe: ", err)
     fmt.Println(123)
