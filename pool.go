@@ -13,7 +13,7 @@ import (
 	_ "github.com/ziutek/mymysql/godrv"
 	"log"
 	"net/http"
-	"strings"
+	// "strings"
 	"encoding/json"
 	// "os"
 	"strconv"
@@ -25,8 +25,6 @@ var config = readConfig()
 // var max_pool = strconv.ParseInt(string(config["max_pool_size"]), 10, 0)
 // **/
 
-// var xx = 10
-// fmt.Println(xx)
 
 var MAX_POOL_SIZE = 10
 var MySQLPool chan *sql.DB
@@ -100,18 +98,17 @@ func mpp(w http.ResponseWriter, r *http.Request) {
     checkErr(err)
     readCols := make([]interface{}, len(colNames))
     writeCols := make([][]byte, len(colNames))
+    // writeCols := make([]byte, len(colNames))
+    // writeCols := make([]interface{}, len(colNames))
     for i, _ := range writeCols {
       readCols[i] = &writeCols[i]
     }
     
-    // result := make([]string, len(colNames))
-    result := make([][]string, 0)
+    result := make([]map[string]interface{}, 0)
 		// fmt.Println("len res:", len(result))
 		// fmt.Println(result)
 		
-		// xx := make([]string, 0)
-		// fmt.Println(xx)
-		fmt.Println(colNames)
+		// fmt.Println(colNames)
 		
 		for rows.Next() {
 			if err := rows.Scan(readCols...); err != nil {
@@ -122,8 +119,7 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 			
 			// fmt.Println(writeCols)
 			var tmpStr string
-			// var tmpMap = make(map[string]interface{})
-			var tmpMap = make(map[string]string)
+			tmpMap := make(map[string]interface{})
 			
       for i, raw := range writeCols {
 				// var tmpStr string
@@ -132,25 +128,17 @@ func mpp(w http.ResponseWriter, r *http.Request) {
         } else {
 					tmpStr += string(raw) 
 					tmpMap[colNames[i]] = string(raw)
-					// tmpStr += "xxxx" 
-          // result = append(result, strings.TrimSpace(string(raw))+"-")
-					result[i] = tmpMap
+					result =  append(result, tmpMap )
         }
       }
-			// result = append(result, tmpStr+"-")
-			// result = append(result, tmpMap)
-			// result[i] = tmpMap
 		}
     
-		// fmt.Println(len(result))
 		// fmt.Println(result)
-		// result = append(result[1:])
-		fmt.Println(result)
-		resStr := strings.Join(result, ", ") 
-		// fmt.Fprintf(w, resStr)
 		
-		back["rows"] = resStr 	
+		// back["rows"] = resStr 	
+		back["rows"] = result 	
 		jsback, _ := json.Marshal(back)
+		// jsback, _ := json.Marshal(result)
 		fmt.Fprintf(w, string(jsback))
     
 		if err := rows.Err(); err != nil {
