@@ -13,22 +13,35 @@ import (
 	_ "github.com/ziutek/mymysql/godrv"
 	"log"
 	"net/http"
-	"strings"
+	// "strings"
 	"encoding/json"
 	// "os"
+	"strconv"
 )
+
+// /**
+var config = readConfig()
+// fmt.Println(config)
+// var max_pool = strconv.ParseInt(string(config["max_pool_size"]), 10, 0)
+// **/
+
 
 var MAX_POOL_SIZE = 10
 var MySQLPool chan *sql.DB
 
 func getPool() *sql.DB {
+	// fmt.Println(config)
+	// fmt.Println(config["bind"])
 	if MySQLPool == nil {
 		MySQLPool = make(chan *sql.DB, MAX_POOL_SIZE)
 	}
 
 	if len(MySQLPool) == 0 {
+		max_pool, _ := strconv.ParseInt(config["max_pool_size"], 10, 0)
+		// fmt.Println(max_pool)
 		go func() {
-			for i := 0; i < MAX_POOL_SIZE; i++ {
+			// for i := 0; i < MAX_POOL_SIZE; i++ {
+			for i := 0; i < int(max_pool); i++ {
 				fmt.Println("crean DB conn....")
 				mysqlc, err := sql.Open("mymysql", "tcp:127.0.0.1:3306*test/root/")
 				if err != nil {
@@ -85,38 +98,47 @@ func mpp(w http.ResponseWriter, r *http.Request) {
     checkErr(err)
     readCols := make([]interface{}, len(colNames))
     writeCols := make([][]byte, len(colNames))
+    // writeCols := make([]byte, len(colNames))
+    // writeCols := make([]interface{}, len(colNames))
     for i, _ := range writeCols {
       readCols[i] = &writeCols[i]
     }
     
-    result := make([]string, len(colNames))
-		// fmt.Println(len(result))
-    
+    result := make([]map[string]interface{}, 0)
+		// fmt.Println("len res:", len(result))
+		// fmt.Println(result)
+		
+		// fmt.Println(colNames)
+		
 		for rows.Next() {
 			if err := rows.Scan(readCols...); err != nil {
 				log.Fatal(err)
 				back["code"] = 2;
 				back["status"] = "fail";
 			}
-      
+			
+			// fmt.Println(writeCols)
+			var tmpStr string
+			tmpMap := make(map[string]interface{})
+			
       for i, raw := range writeCols {
+				// var tmpStr string
         if raw == nil {
-          result[i] = "\\N"
+          // result[i] = "\\N"
         } else {
-          result = append(result, string(raw))
+					tmpStr += string(raw) 
+					tmpMap[colNames[i]] = string(raw)
+					result =  append(result, tmpMap )
         }
       }
 		}
     
-		// fmt.Println(len(result))
 		// fmt.Println(result)
-		result = append(result[1:])
-		// fmt.Println(result)
-		resStr := strings.Join(result, ", ") 
-		// fmt.Fprintf(w, resStr)
 		
-		back["rows"] = resStr 	
+		// back["rows"] = resStr 	
+		back["rows"] = result 	
 		jsback, _ := json.Marshal(back)
+		// jsback, _ := json.Marshal(result)
 		fmt.Fprintf(w, string(jsback))
     
 		if err := rows.Err(); err != nil {
