@@ -12,6 +12,7 @@ import (
   // "flag"
   "log"
   "net/http"
+  "strings"
 )
 
 func startHttpServ() {
@@ -20,7 +21,7 @@ func startHttpServ() {
   // var port = ":9090"
   var port = config["port"]
   // fmt.Println(port)
-  err := http.ListenAndServe(":"+port, nil) 
+  err := http.ListenAndServe(":"+strings.TrimSpace(port), nil) 
   if err != nil {
     log.Fatal("ListenAndServe: ", err)
     fmt.Println(123)
