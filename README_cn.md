@@ -29,6 +29,7 @@ golang开发的一个mysql连接代理池, HTTP返回查询结果。
 code 0 is for success
      1 is for wrong query
      2 is for wrong get data
+     3 is for wrong uukey 
 status success or fail
 rows query data
 ```
