@@ -30,6 +30,12 @@ var MAX_POOL_SIZE = 10
 var MySQLPool chan *sql.DB
 
 func getPool() *sql.DB {
+	config := readConfig()
+	dbhost := config["dbhost"]
+	dbport := config["dbport"]
+	dbuser := config["dbuser"]
+	dbpwd := config["dbpwd"]
+	dbname := config["dbname"]
 	// fmt.Println(config)
 	// fmt.Println(config["bind"])
 	if MySQLPool == nil {
@@ -43,7 +49,8 @@ func getPool() *sql.DB {
 			// for i := 0; i < MAX_POOL_SIZE; i++ {
 			for i := 0; i < int(max_pool); i++ {
 				fmt.Println("crean DB conn....")
-				mysqlc, err := sql.Open("mymysql", "tcp:127.0.0.1:3306*test/root/")
+				// mysqlc, err := sql.Open("mymysql", "tcp:127.0.0.1:3306*test/root/")
+				mysqlc, err := sql.Open("mymysql", "tcp:"+dbhost+":"+dbport+"*"+dbname+"/"+dbuser+"/"+dbpwd)
 				if err != nil {
 					panic(err)
 				}
@@ -128,9 +135,9 @@ func mpp(w http.ResponseWriter, r *http.Request) {
         } else {
 					tmpStr += string(raw) 
 					tmpMap[colNames[i]] = string(raw)
-					result =  append(result, tmpMap )
         }
       }
+			result = append(result, tmpMap )
 		}
     
 		// fmt.Println(result)
