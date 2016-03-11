@@ -1,8 +1,8 @@
 /**
-* Copyright 0x029 Inc. 
+* Copyright 0x029 Inc.
 * License: MIT License
 * Author: JJyy<82049406@qq.com>
-* mysql pool setting 
+* mysql pool setting
 **/
 package main
 
@@ -21,10 +21,10 @@ import (
 
 // /**
 var config = readConfig()
+
 // fmt.Println(config)
 // var max_pool = strconv.ParseInt(string(config["max_pool_size"]), 10, 0)
 // **/
-
 
 var MAX_POOL_SIZE = 10
 var MySQLPool chan *sql.DB
@@ -79,89 +79,95 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 		*	the json return back
 		* code 0 is for success
 		*			 1 is for wrong query
-		*			 2 is for wrong get data 
+		*			 2 is for wrong get data
 		* status success or fail
-		* rows query data 
+		* rows query data
 		**/
-		var back = make(map[string]interface{})		//return json
-		back["code"] = 0;
-		back["status"] = "success";
-		back["rows"] = "";
-		
+		var back = make(map[string]interface{}) //return json
+		back["code"] = 0
+		back["status"] = "success"
+		back["rows"] = ""
+
 		query := r.FormValue("query")
 		fmt.Println("query is: ", query)
 		// os.Exit(3)
 
-		dbx := getPool()
-		rows, err := dbx.Query(query)
-		if err != nil {
-			log.Fatal(err)
-			back["code"] = 1;
-			back["status"] = "fail";
+		var errCode = 0
+		uukey := r.FormValue("uukey")
+		if uukey != config["uukey"] {
+			back["code"] = 3
+			back["status"] = "fail"
+			// log.Fatal("uukey not the same")
+			errCode = 1
 		}
 
-		// var email string
-    colNames, err := rows.Columns()
-    checkErr(err)
-    readCols := make([]interface{}, len(colNames))
-    writeCols := make([][]byte, len(colNames))
-    // writeCols := make([]byte, len(colNames))
-    // writeCols := make([]interface{}, len(colNames))
-    for i, _ := range writeCols {
-      readCols[i] = &writeCols[i]
-    }
-    
-    result := make([]map[string]interface{}, 0)
-		// fmt.Println("len res:", len(result))
-		// fmt.Println(result)
-		
-		// fmt.Println(colNames)
-		
-		for rows.Next() {
-			if err := rows.Scan(readCols...); err != nil {
-				log.Fatal(err)
-				back["code"] = 2;
-				back["status"] = "fail";
+		if errCode == 0 {
+			dbx := getPool()
+			rows, errQuery := dbx.Query(query)
+			if errQuery != nil {
+				back["code"] = 1
+				back["status"] = "fail"
+				// log.Fatal(err)
+				fmt.Println(errQuery)
+				errCode = 1
 			}
-			
-			// fmt.Println(writeCols)
-			var tmpStr string
-			tmpMap := make(map[string]interface{})
-			
-      for i, raw := range writeCols {
-				// var tmpStr string
-        if raw == nil {
-          // result[i] = "\\N"
-        } else {
-					tmpStr += string(raw) 
-					tmpMap[colNames[i]] = string(raw)
-        }
-      }
-			result = append(result, tmpMap )
+
+			if errQuery == nil {
+				// var email string
+				colNames, err := rows.Columns()
+				checkErr(err)
+				readCols := make([]interface{}, len(colNames))
+				writeCols := make([][]byte, len(colNames))
+				// writeCols := make([]byte, len(colNames))
+				// writeCols := make([]interface{}, len(colNames))
+				for i, _ := range writeCols {
+					readCols[i] = &writeCols[i]
+				}
+
+				result := make([]map[string]interface{}, 0)
+				// fmt.Println("len res:", len(result))
+				// fmt.Println(result)
+
+				// fmt.Println(colNames)
+
+				for rows.Next() {
+					if err := rows.Scan(readCols...); err != nil {
+						log.Fatal(err)
+						back["code"] = 2
+						back["status"] = "fail"
+					}
+
+					// fmt.Println(writeCols)
+					var tmpStr string
+					tmpMap := make(map[string]interface{})
+
+					for i, raw := range writeCols {
+						// var tmpStr string
+						if raw == nil {
+							// result[i] = "\\N"
+						} else {
+							tmpStr += string(raw)
+							tmpMap[colNames[i]] = string(raw)
+						}
+					}
+					result = append(result, tmpMap)
+				}
+
+				if err := rows.Err(); err != nil {
+					log.Fatal(err)
+				}
+				// fmt.Println(result)
+
+				// back["rows"] = resStr
+				back["rows"] = result
+			}
+			defer putPool(dbx)
 		}
-    
-		// fmt.Println(result)
-		
-		// back["rows"] = resStr 	
-		back["rows"] = result 	
+
 		jsback, _ := json.Marshal(back)
 		// jsback, _ := json.Marshal(result)
 		fmt.Fprintf(w, string(jsback))
-    
-		if err := rows.Err(); err != nil {
-			log.Fatal(err)
-		}
-		defer putPool(dbx)
+
+		// defer putPool(dbx)
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
