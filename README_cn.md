@@ -7,6 +7,7 @@ golang开发的一个mysql连接代理池, HTTP返回查询结果。
 特性(迭代更新支持)
 ======
 * golang查询mysql， 支持连接池， HTTP返回数据，通过POST传递sql语句 
+* 支持查询数据缓存 
 * 支持多种语言（发送POST请求即可） 
 * 读写分离 
 * SQL防注入 

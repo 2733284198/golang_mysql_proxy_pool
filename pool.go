@@ -88,10 +88,6 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 		back["status"] = "success"
 		back["rows"] = ""
 
-		query := r.FormValue("query")
-		fmt.Println("query is: ", query)
-		// os.Exit(3)
-
 		var errCode = 0
 		uukey := r.FormValue("uukey")
 		if uukey != config["uukey"] {
@@ -101,7 +97,20 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 			errCode = 1
 		}
 
-		if errCode == 0 {
+		if errCode == 0 { //check secure uukey
+			query := r.FormValue("query")
+			fmt.Println("query is: ", query)
+			// os.Exit(3)
+			
+			//get cache info
+			if query == "cc_info" {
+				// ccInfo()
+				cc_info := ccInfo()
+				fmt.Fprintf(w, cc_info)
+				return
+			}
+
+			//get DB data
 			dbx := getPool()
 			rows, errQuery := dbx.Query(query)
 			if errQuery != nil {
@@ -165,6 +174,14 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 		}
 
 		jsback, _ := json.Marshal(back)
+
+		cache := r.FormValue("cache")
+		ccKey := r.FormValue("cache_key")
+		if string(config["cache"]) == "1" && cache == "1" && ccKey != "" {
+			//store cache
+			ccSet(ccKey, string(jsback))
+		}
+
 		// jsback, _ := json.Marshal(result)
 		fmt.Fprintf(w, string(jsback))
 

@@ -24,6 +24,9 @@ const (
 	VERSION     string = "0.1"
 )
 
+
+var cc = make(map[string]string) //cache map
+
 func readConfig() (new_config map[string]string) {
 	config := make(map[string]string)
 	dir, _ := path.Split(os.Args[0])
