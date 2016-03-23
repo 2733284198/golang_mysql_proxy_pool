@@ -8,6 +8,7 @@ mysql procy pool by golang, select query and use HTTP return data
 Future(coming soon...)
 ======
 * golang connect mysql， connect pool， HTTP get data，use POST for sql query 
+* support postgre database 
 * support many program language (just use POST query) 
 * write, read separate 
 * deal SQL inject
