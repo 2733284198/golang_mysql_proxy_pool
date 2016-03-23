@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	_ "github.com/ziutek/mymysql/godrv"
 	"log"
 	"net/http"
@@ -31,6 +32,7 @@ var MySQLPool chan *sql.DB
 
 func getPool() *sql.DB {
 	config := readConfig()
+	dbAdapter := config["db_adapter"]
 	dbhost := config["dbhost"]
 	dbport := config["dbport"]
 	dbuser := config["dbuser"]
@@ -50,11 +52,23 @@ func getPool() *sql.DB {
 			for i := 0; i < int(max_pool); i++ {
 				fmt.Println("crean DB conn....")
 				// mysqlc, err := sql.Open("mymysql", "tcp:127.0.0.1:3306*test/root/")
-				mysqlc, err := sql.Open("mymysql", "tcp:"+dbhost+":"+dbport+"*"+dbname+"/"+dbuser+"/"+dbpwd)
-				if err != nil {
-					panic(err)
+				
+				if dbAdapter == "mysql" {
+					//mysql conn
+					mysqlc, err := sql.Open("mymysql", "tcp:"+dbhost+":"+dbport+"*"+dbname+"/"+dbuser+"/"+dbpwd)
+					if err != nil {
+						panic(err)
+					}
+					putPool(mysqlc)
+				} else if dbAdapter == "pgsql" {
+					//pgsql conn
+					// mysqlc, err := sql.Open("postgres", "user=postgres_user password=password host=172.16.2.29 dbname=my_postgres_db sslmode=disable")
+					mysqlc, err := sql.Open("postgres", "user="+dbuser+" password="+dbpwd+" host="+dbhost+" port="+dbport+" dbname="+dbname+" sslmode=disable")
+					if err != nil {
+						panic(err)
+					}
+					putPool(mysqlc)
 				}
-				putPool(mysqlc)
 			}
 		}()
 	}
@@ -101,7 +115,7 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 			query := r.FormValue("query")
 			fmt.Println("query is: ", query)
 			// os.Exit(3)
-			
+
 			//get cache info
 			if query == "cc_info" {
 				// ccInfo()

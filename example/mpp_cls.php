@@ -37,9 +37,8 @@ class Mpp {
   
 }
 
-/**
-$mpp = new Mpp("http://127.0.0.1:9090/mpp");
-$str = $mpp->fetch("select * from user limie 1");
-print_r($str);
-**/
+// $mpp = new Mpp("http://127.0.0.1:9090/mpp");
+// $str = $mpp->fetch("select * from user limie 1");
+// print_r($str);
+
 ?>
