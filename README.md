@@ -3,7 +3,7 @@ golang mysql pool proxy(MPP)
 =======
 mysql procy pool by golang, select query and use HTTP return data
 
-<a href="README_cn.md">中文说明</a>
+<a href="README_cn.md">英文说明最详细，简单的可以看中文说明</a>
 
 Future(coming soon...)
 ======
@@ -19,10 +19,16 @@ Future(coming soon...)
 build & run (linux), windows the same
 =====
 ```cd project_path  ```<br />
-``` go build  ```<br />
+```go build  ```<br />
 ```mv golang_mysql_proxy_pool mpp ```<br />
-```./mpp ```
+```./mpp ``` <br /><br />
 
+#### how run as daemon & log file
+if you want to run as daemon, you can do like this(for linux):
+
+```nohub  ./mpp > mpp.log 2>&1 & ```
+
+that will output the log info to the file mpp.log, more info just man nohub 
 
 
 Test
