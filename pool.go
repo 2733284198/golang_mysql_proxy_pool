@@ -18,6 +18,8 @@ import (
 	"encoding/json"
 	// "os"
 	"strconv"
+	"time"
+	"runtime"
 )
 
 // /**
@@ -32,6 +34,9 @@ var MySQLPool chan *sql.DB
 
 func getPool() *sql.DB {
 	config := readConfig()
+	parallel_num, _ := strconv.ParseInt(config["parallel_num"], 10, 0) 
+	runtime.GOMAXPROCS(int(parallel_num))
+	
 	dbAdapter := config["db_adapter"]
 	dbhost := config["dbhost"]
 	dbport := config["dbport"]
@@ -43,12 +48,11 @@ func getPool() *sql.DB {
 	if MySQLPool == nil {
 		MySQLPool = make(chan *sql.DB, MAX_POOL_SIZE)
 	}
-
-	if len(MySQLPool) == 0 {
+	
+	if len(MySQLPool) == 0 {	//if no DB conn, we make the pool
 		max_pool, _ := strconv.ParseInt(config["max_pool_size"], 10, 0)
 		// fmt.Println(max_pool)
 		go func() {
-			// for i := 0; i < MAX_POOL_SIZE; i++ {
 			for i := 0; i < int(max_pool); i++ {
 				fmt.Println("crean DB conn....")
 				// mysqlc, err := sql.Open("mymysql", "tcp:127.0.0.1:3306*test/root/")
@@ -63,16 +67,16 @@ func getPool() *sql.DB {
 				} else if dbAdapter == "pgsql" {
 					//pgsql conn
 					// mysqlc, err := sql.Open("postgres", "user=postgres_user password=password host=172.16.2.29 dbname=my_postgres_db sslmode=disable")
-					mysqlc, err := sql.Open("postgres", "user="+dbuser+" password="+dbpwd+" host="+dbhost+" port="+dbport+" dbname="+dbname+" sslmode=disable")
+					postgrec, err := sql.Open("postgres", "user="+dbuser+" password="+dbpwd+" host="+dbhost+" port="+dbport+" dbname="+dbname+" sslmode=disable")
 					if err != nil {
 						panic(err)
 					}
-					putPool(mysqlc)
+					putPool(postgrec)
 				}
 			}
 		}()
 	}
-	return <-MySQLPool
+	return <-MySQLPool	//parallel return DB conn use pool
 }
 
 func putPool(conn *sql.DB) {
@@ -110,22 +114,29 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 			// log.Fatal("uukey not the same")
 			errCode = 1
 		}
-
+		
+		cache := r.FormValue("cache")	//cache enable
+		ccKey := r.FormValue("cache_key")	//cache key
+		ccTime := r.FormValue("cctime")	//cache time
+		
 		if errCode == 0 { //check secure uukey
 			query := r.FormValue("query")
 			fmt.Println("query is: ", query)
 			// os.Exit(3)
-
 			//get cache info
 			if query == "cc_info" {
 				// ccInfo()
 				cc_info := ccInfo()
 				fmt.Fprintf(w, cc_info)
 				return
+			} else if config["cache"] == "1" && query == "cc_get" {	//get cache by key
+				// ccGet(ccKey)
+			  fmt.Fprintf(w, ccGet(ccKey))	
+				return
 			}
 
 			//get DB data
-			dbx := getPool()
+			dbx := getPool()	//get the DB conn from pool when we want to use
 			rows, errQuery := dbx.Query(query)
 			if errQuery != nil {
 				back["code"] = 1
@@ -184,21 +195,22 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 				// back["rows"] = resStr
 				back["rows"] = result
 			}
-			defer putPool(dbx)
+			defer putPool(dbx)	//put the DB conn into pool after finish used
 		}
-
+		//just query DB
 		jsback, _ := json.Marshal(back)
-
-		cache := r.FormValue("cache")
-		ccKey := r.FormValue("cache_key")
+		
+		//if set cache
 		if string(config["cache"]) == "1" && cache == "1" && ccKey != "" {
+			startTime := strconv.FormatInt(time.Now().Unix(), 10)
+			ccJsback := string(jsback) + string(config["cache_split"]) +
+									string(startTime) + ":" + ccTime 
 			//store cache
-			ccSet(ccKey, string(jsback))
+			// ccSet(ccKey, string(jsback))
+			ccSet(ccKey, string(ccJsback))
 		}
-
 		// jsback, _ := json.Marshal(result)
 		fmt.Fprintf(w, string(jsback))
-
 		// defer putPool(dbx)
 	}
 }
