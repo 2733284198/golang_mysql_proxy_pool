@@ -31,7 +31,7 @@ if you want to run as daemon, you can do like this(for linux):
 that will output the log info to the file mpp.log, more info just man nohub 
 
 
-#### how to use cache ? 
+#### how to use ? cache & data & ???
 the client for PHP in the folder ./example/mpp_cls.php, the sample code 
 for every function of MPP client, please check it
 
