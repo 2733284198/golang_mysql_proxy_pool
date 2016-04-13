@@ -122,10 +122,10 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 
 		if errCode == 0 { //check secure uukey
 			query := r.FormValue("query")
-			// fmt.Println("query is: ", query)
+			fmt.Println("query is: ", query)
 			// os.Exit(3)
 			//get cache info
-			if query == "cc_info" {
+			if query == "cc_info" {	//get all cache info
 				// ccInfo()
 				cc_info := ccInfo()
 				fmt.Fprintf(w, cc_info)
@@ -163,7 +163,7 @@ func mpp(w http.ResponseWriter, r *http.Request) {
 				// rows, errQuery := dbx.Query(query)
 				rows, errQuery := dbx.Query(query)
 				// rows, affRows, errQuery := dbx.Query(query)
-				fmt.Println("rows:	", rows)
+				// fmt.Println("rows:	", rows)
 				// fmt.Println("affRows:	", affRows)
 				// fmt.Println("affRows:	", rows.RowsAffected())
 

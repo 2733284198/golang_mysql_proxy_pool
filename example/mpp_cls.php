@@ -41,19 +41,60 @@ class Mpp {
     $rq = '&query='.$query.'&cache=1&cache_key='.$ccArr[0].'&cctime='.$ccArr[1];
   }
     $jsonArr = $this->unifyRequest($rq);
+    $jsonArr = $this->formatJson($jsonArr);
     return $jsonArr;
   }
   
   /**
   * get cache by key
   *
-  *@param: 
-  *@return: 
+  *@param:  string key
+  *@return: string 
   *
   **/
   function getCache($key) {
     $rq = '&query=cc_get&cache_key='.$key;
     $jsonArr = $this->unifyRequest($rq);
+    $jsonArr = $this->formatJson($jsonArr);
+    return $jsonArr;
+  }
+  
+  /**
+  * set cache by key
+  *
+  *@param: string key, string val
+  *@return: string
+  *
+  **/
+  // function setCache($key, $val) {
+  //   $rq = '&query=cc_get&cache_key='.$key;
+  //   $jsonArr = $this->unifyRequest($rq);
+  //   $jsonArr = $this->formatJson($jsonArr);
+  //   return $jsonArr;
+  // }
+  
+  /**
+  * get all cache info
+  *
+  *@param: 
+  *@return: 
+  **/
+  function getAllCc() {
+    $rq = '&query=cc_info';
+    $jsonArr = $this->unifyRequest($rq);
+    return $jsonArr;
+  }
+  
+  
+  /**
+  * format json string
+  *
+  *@param:  json string
+  *@return: array 
+  **/
+  function formatJson($jsonStr) {
+    $jsonArr = json_decode($jsonStr, true);
+    $jsonArr = $jsonArr['rows'];
     return $jsonArr;
   }
   
@@ -66,7 +107,7 @@ class Mpp {
   function unifyRequest($rq) {
     $cl = curl_init();
     curl_setopt($cl, CURLOPT_URL, $this->_mppServ);
-    echo "query is: ".$rq."\n\n";
+    // echo "query is: ".$rq."\n\n";
     // curl_setopt($cl,CURLOPT_POSTFIELDS,'uukey='.self::$_uukey.'&query='.$query); 
     curl_setopt($cl,CURLOPT_POSTFIELDS,'uukey='.self::$_uukey.$rq); 
     curl_setopt($cl, CURLOPT_RETURNTRANSFER, 1);
@@ -80,10 +121,15 @@ class Mpp {
 $mpp = new Mpp("http://127.0.0.1:9090/mpp");
 //no set cache, just query DB
 // $str = $mpp->fetch("select * from users limit 1");
+
 //set  cache
 // $str = $mpp->fetch("select * from users limit 1", array('sql_key', '3600'));
+
 //get cache
 $str = $mpp->getCache('sql_key');
+
+//get all cache info
+$str = $mpp->getAllCc();
 
 print_r($str);
 
