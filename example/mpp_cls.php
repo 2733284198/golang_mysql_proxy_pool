@@ -116,6 +116,20 @@ class Mpp {
     return $str;
   } 
   
+  /**
+  * insert, update, delete query, return affect numbers
+  *
+  *@author: JJyy
+  *@param:string query 
+  *@return:affect rows 
+  **/
+  function query($query) {
+    $rq = '&query='.$query;
+    $jsonArr = $this->unifyRequest($rq);
+    $affectNum = $this->formatJson($jsonArr);
+    return $affectNum;
+  }
+  
 }
 
 $mpp = new Mpp("http://127.0.0.1:9090/mpp");
@@ -126,10 +140,14 @@ $mpp = new Mpp("http://127.0.0.1:9090/mpp");
 // $str = $mpp->fetch("select * from users limit 1", array('sql_key', '3600'));
 
 //get cache
-$str = $mpp->getCache('sql_key');
+// $str = $mpp->getCache('sql_key');
 
 //get all cache info
-$str = $mpp->getAllCc();
+// $str = $mpp->getAllCc();
+
+//update the user info
+$sql = "update users set email='0123@111.com' where id=1";
+$str = $mpp->query($sql);
 
 print_r($str);
 
