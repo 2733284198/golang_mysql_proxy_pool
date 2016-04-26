@@ -11,7 +11,7 @@ Future(coming soon...)
 * support postgre database 
 * support many program language (just use POST query) 
 * write, read separate 
-* deal SQL inject
+* deal SQL inject (now use your client language, custom by yourself)
 * support HTTPS 
 * distributed HTTP server
 * support log file
